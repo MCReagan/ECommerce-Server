@@ -51,34 +51,12 @@ router.put('/:id', async (req, res) => {
       },
     });
 
-    if (!tagData) {
+    if (!productTags) {
       res.status(404).json({ message: 'No tag with this id!' });
       return;
     }
 
-    await Tag.findAll({ where: { tag_id: req.params.id } });
-
-    const productTagIds = productTags.map(({ tag_id }) => tag_id);
-
-    const newProductTags = req.body.tagIds
-      .filter((tag_id) => !productTagIds.includes(tag_id))
-      .map((tag_id) => {
-        return {
-          product_id: req.params.id,
-          tag_id,
-        };
-      });
-
-    const productTagsToRemove = productTags
-      .filter(({ tag_id }) => !req.body.tagIds.includes(tag_id))
-      .map(({ id }) => id);
-
-    await Promise.all([
-      await ProductTag.destroy({ where: { id: productTagsToRemove } }),
-      await ProductTag.bulkCreate(newProductTags),
-    ]);
-
-    res.json(updatedProductTags)
+    res.json(productTags)
   } catch (err) {
     res.status(400).json(err);
   }
